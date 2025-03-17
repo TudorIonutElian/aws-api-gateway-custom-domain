@@ -25,8 +25,8 @@ resource "aws_api_gateway_resource" "youtube_demo_resource" {
 *** # Add first gateway METHOD - aws_api_gateway_method
 **********************************************************/
 resource "aws_api_gateway_method" "proxy_aws_api_gateway_method" {
-  rest_api_id   = aws_api_gateway_rest_api.cloudwatch_mock_api.id
-  resource_id   = aws_api_gateway_resource.demo_resource.id
+  rest_api_id   = aws_api_gateway_rest_api.youtube_demo_api.id
+  resource_id   = aws_api_gateway_resource.youtube_demo_resource.id
   http_method   = "GET"
   authorization = "NONE"
 }
