@@ -26,6 +26,6 @@ resource "aws_route53_record" "api_domain_record" {
   type = "CNAME"
   ttl  = "300"
 
-  records = ["${aws_api_gateway_rest_api.cloudwatch_mock_api.id}.execute-api.eu-central-1.amazonaws.com"]
+  records = ["${aws_api_gateway_rest_api.youtube_demo_api.id}.execute-api.eu-central-1.amazonaws.com"]
   zone_id = data.aws_route53_zone.learndevtech.zone_id
 }
