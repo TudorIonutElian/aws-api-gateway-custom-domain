@@ -56,11 +56,6 @@ resource "aws_api_gateway_integration_response" "proxy" {
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
-
-  depends_on = [
-    aws_api_gateway_method.proxy_aws_api_gateway_method,
-    aws_api_gateway_integration.lambda_integration_write_payload_func
-  ]
 }
 
 
