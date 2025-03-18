@@ -1,5 +1,5 @@
 /**********************************************************
-  # Add the API Gatewy
+  # Add the API Gateway
 **********************************************************/
 
 resource "aws_api_gateway_rest_api" "youtube_demo_api" {
@@ -12,7 +12,7 @@ resource "aws_api_gateway_rest_api" "youtube_demo_api" {
 }
 
 /**********************************************************
-*** # Add /demo resource to the API Gateway
+*** # Add /youtube-demo resource to the API Gateway
 **********************************************************/
 resource "aws_api_gateway_resource" "youtube_demo_resource" {
   rest_api_id = aws_api_gateway_rest_api.youtube_demo_api.id
@@ -20,22 +20,23 @@ resource "aws_api_gateway_resource" "youtube_demo_resource" {
   path_part   = "youtube-demo"
 }
 
-
 /**********************************************************
-*** # Add first gateway METHOD - aws_api_gateway_method
+*** # Add GET method to the /youtube-demo resource
 **********************************************************/
-resource "aws_api_gateway_method" "proxy_aws_api_gateway_method" {
+resource "aws_api_gateway_method" "get_method" {
   rest_api_id   = aws_api_gateway_rest_api.youtube_demo_api.id
   resource_id   = aws_api_gateway_resource.youtube_demo_resource.id
   http_method   = "GET"
   authorization = "NONE"
 }
 
-
-resource "aws_api_gateway_method_response" "proxy_aws_api_gateway_method_response_demo" {
+/**********************************************************
+*** # Add method response for the GET method
+**********************************************************/
+resource "aws_api_gateway_method_response" "get_method_response" {
   rest_api_id = aws_api_gateway_rest_api.youtube_demo_api.id
   resource_id = aws_api_gateway_resource.youtube_demo_resource.id
-  http_method = aws_api_gateway_method.proxy_aws_api_gateway_method.http_method
+  http_method = aws_api_gateway_method.get_method.http_method
   status_code = "200"
 
   response_parameters = {
@@ -45,11 +46,28 @@ resource "aws_api_gateway_method_response" "proxy_aws_api_gateway_method_respons
   }
 }
 
-resource "aws_api_gateway_integration_response" "proxy" {
+/**********************************************************
+*** # Add integration for the GET method
+**********************************************************/
+resource "aws_api_gateway_integration" "get_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.youtube_demo_api.id
+  resource_id             = aws_api_gateway_resource.youtube_demo_resource.id
+  http_method             = aws_api_gateway_method.get_method.http_method
+  integration_http_method = "POST"
+  type                    = "MOCK"
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+/**********************************************************
+*** # Add integration response for the GET method
+**********************************************************/
+resource "aws_api_gateway_integration_response" "get_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.youtube_demo_api.id
   resource_id = aws_api_gateway_resource.youtube_demo_resource.id
-  http_method = aws_api_gateway_method.proxy_aws_api_gateway_method.http_method
-  status_code = aws_api_gateway_method_response.proxy_aws_api_gateway_method_response_demo.status_code
+  http_method = aws_api_gateway_method.get_method.http_method
+  status_code = aws_api_gateway_method_response.get_method_response.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
@@ -58,25 +76,14 @@ resource "aws_api_gateway_integration_response" "proxy" {
   }
 }
 
-
 /**********************************************************
 *** # API Deployment
 **********************************************************/
 resource "aws_api_gateway_deployment" "deployment" {
+  depends_on = [
+    aws_api_gateway_method.get_method,
+    aws_api_gateway_integration.get_integration
+  ]
   rest_api_id = aws_api_gateway_rest_api.youtube_demo_api.id
   stage_name  = "v1"
-}
-
-/**********************************************************
-*** # Add lambda integration
-**********************************************************/
-resource "aws_api_gateway_integration" "lambda_integration_get_logs_func" {
-  rest_api_id             = aws_api_gateway_rest_api.youtube_demo_api.id
-  resource_id             = aws_api_gateway_resource.youtube_demo_resource.id
-  http_method             = aws_api_gateway_method.proxy_aws_api_gateway_method.http_method
-  integration_http_method = "POST"
-  type                    = "MOCK"
-  request_templates = {
-    "application/json" = "{\"statusCode\": 200}"
-  }
 }
